@@ -6,15 +6,20 @@
   "scripts": {
     "dev": "npx tsoa spec-and-routes && ts-node --files ./src/index.ts",
     "build": "npx tsc",
-    "start": "node ./build/src/index.js",
+    "start": "node ./build/index.js",
     "lint": "eslint src test --max-warnings=0",
     "format": "prettier --write src test",
     "format:check": "prettier --check src test",
     "typecheck": "tsc --noEmit",
-    "test": "dotenv -e .env.test -- vitest --config ./test/vitest.config.ts",
-    "test:coverage": "dotenv -e .env.test -- vitest run --coverage --config ./test/vitest.config.ts",
+    "test": "vitest --config ./test/vitest.config.ts",
+    "test:coverage": "vitest run --coverage --config ./test/vitest.config.ts",
     "db-push": "npx prisma db push --schema=./src/db/schema.prisma --accept-data-loss",
     "db-generate": "npx prisma --schema=./src/db/schema.prisma",
+    "db:migrate:dev": "npx prisma migrate dev --schema=./src/db/schema.prisma",
+    "db:deploy": "npx prisma migrate deploy --schema=./src/db/schema.prisma",
+    "docker:build": "docker build -t menuchi.api:dev .",
+    "docker:up": "docker compose -f docker-compose.dev.yml up --build",
+    "prisma:studio": "npx prisma studio --schema=./src/db/schema.prisma",
     "prepare": "husky"
   },
   "repository": {

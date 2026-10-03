@@ -1,15 +1,21 @@
-name: Test and Build
+name: CI
 
 on:
   push:
-    branches: [ "dev" ]
+    branches: ["main", "dev"]
   pull_request:
-    branches: [ "dev" ]
+    branches: ["main", "dev"]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 env:
+  NODE_ENV: test
   DATABASE_URL: postgres://postgres:postgres@postgres:5432/menuchi
-  REDIS_URL: redis://default@redis:6379/0
-  OTP_REDIS_URL: redis://default@redis:6379/1
+  REDIS_URL: redis://redis:6379/0
+  TRANSFORMERS_REDIS_URL: redis://redis:6379/1
+  OTP_REDIS_URL: redis://redis:6379/2
   OTP_STREAM: otps
   INTERNAL_OTP_URL: http://localhost:9000
   INTERNAL_OTP_ENDPOINT: /api/v1/get-otp
@@ -23,17 +29,16 @@ env:
   SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
   COOKIE_PRIVATE_KEY: ${{ secrets.COOKIE_PRIVATE_KEY }}
   JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
-  
+
 jobs:
-  test:
+  lint-test:
     runs-on: ubuntu-latest
-    container: node:22-bookworm-slim
 
     services:
       postgres:
-        image: postgres
+        image: postgres:16-bookworm
         env:
-          POSTGRES_USERNAME: postgres
+          POSTGRES_USER: postgres
           POSTGRES_PASSWORD: postgres
           POSTGRES_DB: menuchi
         ports:
@@ -43,9 +48,9 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          
+
       redis:
-        image: redis
+        image: redis:7-alpine
         ports:
           - 6379:6379
         options: >-
@@ -53,42 +58,49 @@ jobs:
           --health-interval 10s
           --health-timeout 5s
           --health-retries 5
-          
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Update and Upgrade image
-        run: apt-get update -y && apt-get upgrade -y && apt-get install -y openssl
-        
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
       - name: Install Deps
         run: npm ci
+
+      - name: Lint
+        run: npm run lint && npm run typecheck && npm run format:check
 
       - name: Push DB with prisma
         run: npm run db-push
 
-      - name: Test
-        run: npm test
-     
-  build:
-    runs-on: ubuntu-latest
-    needs: test
-    
-    steps:
-    - name: Check out the repo
-      uses: actions/checkout@v4
+      - name: Test with coverage
+        run: npm run test:coverage
 
-    - name: Login to DockerHub
-      uses: docker/login-action@v3
-      with:
-        username: ${{ secrets.DOCKERHUB_USERNAME }}
-        password: ${{ secrets.DOCKERHUB_TOKEN }}
-        
-    - name: Build and push
-      uses: docker/build-push-action@v5
-      with:
-        context: .
-        file: ./Dockerfile
-        push: true
-        tags: mahdihaghverdi/menuchi-project:dev
-        target: runtime
+  build-push:
+    runs-on: ubuntu-latest
+    needs: lint-test
+    if: github.event_name == 'push'
+
+    steps:
+      - name: Check out the repo
+        uses: actions/checkout@v4
+
+      - name: Login to DockerHub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build and push
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: ./Dockerfile
+          push: true
+          tags: ${{ github.ref == 'refs/heads/main' && 'mahdihaghverdi/menuchi-project:stable' || 'mahdihaghverdi/menuchi-project:dev' }}
+          target: runtime

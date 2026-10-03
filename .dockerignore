@@ -1,7 +1,12 @@
 node_modules
 build
-.env
+coverage
+.env*
 .git
 .gitignore
 .dockerignore
 README.md
+docs
+test
+.github
+.husky

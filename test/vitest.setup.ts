@@ -1,3 +1,6 @@
+// Must stay first: loads .env.test (or process env in CI) before any
+// module (notably db/prisma) reads process.env on import.
+import '../src/config/env';
 import { afterAll, afterEach, beforeAll, vi } from 'vitest';
 
 // Hoisted mocks (must be top-level for vitest hoisting to work reliably).
@@ -63,7 +66,25 @@ function shouldManageDb(): boolean {
 beforeAll(async () => {
   if (!shouldManageDb()) return;
   try {
-    execSync('npm run db-push', { stdio: 'ignore' });
+    // Prisma CLI reads `.env`, never `.env.test`: hand it the validated URL
+    // explicitly so setup syncs the test database even when a (different)
+    // local `.env` exists. Times out via `timeout` to never hang the hook.
+    let databaseUrl = process.env.DATABASE_URL;
+    try {
+      // eslint-disable-next-line @typescript-eslint/no-require-imports
+      const { getEnv } = require('../src/config/env') as typeof import('../src/config/env');
+      databaseUrl = getEnv().DATABASE_URL;
+    } catch {
+      // fall back to process env
+    }
+    execSync(
+      'npx prisma db push --schema=./src/db/schema.prisma --accept-data-loss --skip-generate',
+      {
+        stdio: 'ignore',
+        timeout: 120000,
+        env: { ...process.env, ...(databaseUrl ? { DATABASE_URL: databaseUrl } : {}) },
+      }
+    );
   } catch {
     // Cold environments without Postgres still run pure unit tests.
   }
