@@ -102,9 +102,9 @@ export class AuthService {
   }
 
   generateAuthToken(payload: JWTPayload): string {
-    // Phase-1 hardening: 12h access token (down from 2d). Session cookie
-    // remains 2d; see ARCHITECTURE decision note. Shorter window limits
-    // replay after cookie theft without forcing a refresh-token system yet.
+    // 12h access token (down from 2d). Session cookie remains 2d.
+    // Shorter window limits replay after cookie theft without
+    // forcing a refresh-token system yet.
     let secret: string;
     try {
       // eslint-disable-next-line @typescript-eslint/no-require-imports
