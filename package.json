@@ -1,20 +1,22 @@
 {
-  "name": "menuchi-app",
+  "name": "menuchi-backend",
   "version": "1.0.0",
-  "description": "The backend of Menuchi",
-  "main": "index.js",
+  "description": "No-code menu builder backend — Express + Prisma + Redis + S3 + TSOA",
+  "main": "build/index.js",
   "scripts": {
     "dev": "npx tsoa spec-and-routes && ts-node --files ./src/index.ts",
     "build": "npx tsc",
     "start": "node ./build/index.js",
-    "lint": "eslint src test --max-warnings=0",
+    "lint": "eslint src test",
+    "lint:strict": "eslint src test --max-warnings=0",
     "format": "prettier --write src test",
     "format:check": "prettier --check src test",
     "typecheck": "tsc --noEmit",
     "test": "vitest --config ./test/vitest.config.ts",
     "test:coverage": "vitest run --coverage --config ./test/vitest.config.ts",
     "db-push": "npx prisma db push --schema=./src/db/schema.prisma --accept-data-loss",
-    "db-generate": "npx prisma --schema=./src/db/schema.prisma",
+    "db-generate": "npx prisma generate --schema=./src/db/schema.prisma",
+    "prisma:generate": "npx prisma generate --schema=./src/db/schema.prisma",
     "db:migrate:dev": "npx prisma migrate dev --schema=./src/db/schema.prisma",
     "db:deploy": "npx prisma migrate deploy --schema=./src/db/schema.prisma",
     "docker:build": "docker build -t menuchi.api:dev .",
@@ -24,14 +26,14 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/menuchi-project/menuchi-app"
+    "url": "git+https://github.com/1mimhe/menuchi-backend"
   },
-  "keywords": [],
+  "keywords": ["express", "prisma", "tsoa", "postgresql", "redis", "aws-s3", "docker", "vitest", "typescript"],
   "author": "Mohammad Hosseini",
   "engines": {
     "node": ">=22"
   },
-  "license": "ISC",
+  "license": "MIT",
   "type": "commonjs",
   "lint-staged": {
     "src/**/*.{ts,js}": [
@@ -44,9 +46,9 @@
     ]
   },
   "bugs": {
-    "url": "https://github.com/menuchi-project/menuchi-app/issues"
+    "url": "https://github.com/1mimhe/menuchi-backend/issues"
   },
-  "homepage": "https://github.com/menuchi-project/menuchi-app#readme",
+  "homepage": "https://github.com/1mimhe/menuchi-backend#readme",
   "dependencies": {
     "@aws-sdk/client-s3": "^3.777.0",
     "@aws-sdk/s3-request-presigner": "^3.777.0",
