@@ -21,14 +21,17 @@ env:
   INTERNAL_OTP_ENDPOINT: /api/v1/get-otp
   TRANSFORMERS_STREAM: images
   MENUCHI_FRONT_URL: "http://localhost:3000"
-  S3_BUCKETNAME: ${{ secrets.S3_BUCKETNAME }}
-  S3_ENDPOINT: ${{ secrets.S3_ENDPOINT }}
-  S3_ACCESSKEYID: ${{ secrets.S3_ACCESSKEYID }}
-  S3_SECRETACCESSKEY: ${{ secrets.S3_SECRETACCESSKEY }}
-  S3_DEFAULT_KEY: ${{ secrets.S3_DEFAULT_KEY }}
-  SESSION_SECRET: ${{ secrets.SESSION_SECRET }}
-  COOKIE_PRIVATE_KEY: ${{ secrets.COOKIE_PRIVATE_KEY }}
-  JWT_PRIVATE_KEY: ${{ secrets.JWT_PRIVATE_KEY }}
+  # Dummy test values: S3 is mocked in test/vitest.setup.ts and these
+  # only need to satisfy zod length checks. Real secrets are NOT required
+  # for unit/integration tests (keeps forks + PRs green without setup).
+  S3_BUCKETNAME: test-bucket
+  S3_ENDPOINT: https://s3.amazonaws.com
+  S3_ACCESSKEYID: test-access-key
+  S3_SECRETACCESSKEY: test-secret-key
+  S3_DEFAULT_KEY: test-bucket/default.jpg
+  SESSION_SECRET: test-session-secret-32plus-characters-long
+  COOKIE_PRIVATE_KEY: test-cookie-key-16plus
+  JWT_PRIVATE_KEY: test-jwt-key-16plus
 
 jobs:
   lint-test:
@@ -74,6 +77,9 @@ jobs:
 
       - name: Generate Prisma Client
         run: npx prisma generate --schema=./src/db/schema.prisma
+
+      - name: Generate TSOA routes
+        run: npx tsoa spec-and-routes
 
       - name: Lint
         run: npm run lint
