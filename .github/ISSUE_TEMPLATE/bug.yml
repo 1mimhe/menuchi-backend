@@ -1,0 +1,21 @@
+name: Bug report
+description: Report a reproducible backend bug
+labels: [bug]
+body:
+  - type: textarea
+    id: repro
+    attributes:
+      label: Reproduction steps
+      description: Commands / curl / test showing the bug
+    validations:
+      required: true
+  - type: textarea
+    id: expected
+    attributes:
+      label: Expected behavior
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Commit / branch

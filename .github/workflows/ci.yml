@@ -72,8 +72,17 @@ jobs:
       - name: Install Deps
         run: npm ci
 
+      - name: Generate Prisma Client
+        run: npx prisma generate --schema=./src/db/schema.prisma
+
       - name: Lint
-        run: npm run lint && npm run typecheck && npm run format:check
+        run: npm run lint
+
+      - name: Typecheck
+        run: npm run typecheck
+
+      - name: Format check
+        run: npm run format:check
 
       - name: Push DB with prisma
         run: npm run db-push

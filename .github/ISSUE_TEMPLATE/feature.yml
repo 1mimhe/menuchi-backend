@@ -1,0 +1,17 @@
+name: Feature request
+description: Propose a backend feature
+labels: [enhancement]
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem / motivation
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Proposed API / design
+      description: Endpoints, schema changes, env vars if any
+    validations:
+      required: true
