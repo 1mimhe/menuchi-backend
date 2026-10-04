@@ -117,5 +117,5 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ github.ref == 'refs/heads/main' && 'mahdihaghverdi/menuchi-project:stable' || 'mahdihaghverdi/menuchi-project:dev' }}
+          tags: ${{ github.ref == 'refs/heads/main' && '1mimhe/menuchi-project:stable' || '1mimhe/menuchi-project:dev' }}
           target: runtime
