@@ -19,7 +19,7 @@ volumes:
 
 services:
   menuchi.api:
-    image: mahdihaghverdi/menuchi-project:stable
+    image: 1mimhe/menuchi-project:stable
     container_name: menuchi.api
     hostname: menuchi.api
     restart: always
